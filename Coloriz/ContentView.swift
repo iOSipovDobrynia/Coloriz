@@ -11,6 +11,7 @@ struct ContentView: View {
     
     @State private var slidersValue = (red: Double.random(in: 0...255), green: Double.random(in: 0...255), blue: Double.random(in: 0...255))
     @State private var textValue = (red: "", green: "", blue: "")
+    @State private var alertPresented = false
     
     var body: some View {
         VStack {
@@ -28,20 +29,20 @@ struct ContentView: View {
                     SliderView(value: $slidersValue.blue)
                 }
                 VStack(spacing: 30) {
-                    TextField("\(lround(slidersValue.red))", text: $textValue.red)
-                        .textFieldStyle(.roundedBorder)
-                    TextField("\(lround(slidersValue.green))", text: $textValue.green)
-                        .textFieldStyle(.roundedBorder)
-                    TextField("\(lround(slidersValue.blue))", text: $textValue.blue)
-                        .textFieldStyle(.roundedBorder)
+                    TextFieldView(placeholder: slidersValue.red, text: $textValue.red)
+                    TextFieldView(placeholder: slidersValue.green, text: $textValue.green)
+                    TextFieldView(placeholder: slidersValue.blue, text: $textValue.blue)
                 }
                 .frame(width: 50)
-                .toolbar(content: {
+                .toolbar {
                     ToolbarItemGroup(placement: .keyboard) {
                         Spacer()
                         Button("Done", action: checkValue)
+                            .alert("Wrong format", isPresented: $alertPresented, actions: {}) {
+                                Text("Enter all three value")
+                            }
                     }
-                })
+                }
             }
             Spacer()
         }
@@ -50,6 +51,7 @@ struct ContentView: View {
     
     private func checkValue() {
         guard let redValue = Double(textValue.red), let greenValue = Double(textValue.green), let blueValue = Double(textValue.blue) else {
+            alertPresented.toggle()
             textValue = ("", "", "")
             return
         }
@@ -78,5 +80,17 @@ struct SliderView: View {
             maximumValueLabel: { Text("255") }
         )
         .tint(tintColor)
+    }
+}
+
+struct TextFieldView: View {
+    
+    let placeholder: Double
+    @Binding var text: String
+    
+    var body: some View {
+        TextField("\(lround(placeholder))", text: $text)
+            .textFieldStyle(.roundedBorder)
+            .keyboardType(.asciiCapableNumberPad)
     }
 }
